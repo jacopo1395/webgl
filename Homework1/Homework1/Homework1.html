@@ -59,11 +59,11 @@ void main()
             L = normalize( light - pos );
             E = -pos;
             N = normalize( (modelViewMatrix2*vNormal).xyz);
-            gl_Position =  modelViewMatrix2 * vPosition;
+            // gl_Position =  modelViewMatrix2 * vPosition;
 
-
+    fColor = vColor;
     fTexCoord = vTexCoord;
-    // gl_Position = rz * ry * rx * vPosition;
+    gl_Position = rz * ry * rx * vPosition;
     gl_Position.z = -gl_Position.z;
 }
 </script>
@@ -88,7 +88,7 @@ varying vec3 N, L, E;
 void
 main()
 {
-    vec4 fColor;
+
     vec3 H = normalize( L + E );
     vec4 ambient = ambientProduct;
     float Kd = max( dot(L, N), 0.0 );
@@ -97,11 +97,12 @@ main()
     vec4 specular = Ks * specularProduct;
     if( dot(L, N) < 0.0 ) specular = vec4(0.0, 0.0, 0.0, 1.0);
 
-    fColor = ambient + diffuse +specular;
-    fColor.a = 1.0;
-
-    // gl_FragColor = fColor;
-    gl_FragColor = fColor*(texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord));
+    // vec4 tempColor = fColor;
+    vec4 tempColor = ambient + diffuse +specular;
+    // fColor.a = 1.0;
+    tempColor.a=1.0;
+    gl_FragColor = tempColor;
+    // gl_FragColor = tempColor*(texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord));
 
 }
 </script>
