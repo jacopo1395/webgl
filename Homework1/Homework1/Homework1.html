@@ -9,6 +9,7 @@
 <button id="ButtonP">Positional</button>
 <button id="ButtonD">Directional</button>
 <button id="ButtonA">Spotlight</button>
+<button id="ButtonTex">Texture</button>
 
 
 <script id="vertex-shader" type="x-shader/x-vertex">
@@ -164,6 +165,7 @@ varying  vec2 fTexCoord;
 
 uniform sampler2D Tex0;
 uniform sampler2D Tex1;
+uniform sampler2D Tex2;
 
 uniform float shininess2;
 
@@ -184,10 +186,12 @@ varying vec3 Nd, Ld, Ed;
 varying vec3 Ns, Ls, Es;
 
 uniform bool type2;
+uniform bool texture;
 
 uniform bool positional2;
 uniform bool directional2;
 uniform bool spotlight2;
+
 
 vec4 lightGouraud2(vec4 ambientProduct, vec4 diffuseProduct, vec4 specularProduct, float l){
     vec3 L,N,E;
@@ -213,8 +217,9 @@ vec4 lightGouraud2(vec4 ambientProduct, vec4 diffuseProduct, vec4 specularProduc
 
 void main(){
     if(type2){ //Phong
-        gl_FragColor = fColor;
-        // gl_FragColor = fColor*(texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord));
+        if(texture)  gl_FragColor = fColor;
+        else   gl_FragColor = fColor * (texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord)* texture2D(Tex2, fTexCoord));
+
     }
     else{  //Gouraud
         vec4 tempColor=fColor;
@@ -232,8 +237,8 @@ void main(){
         }
 
 
-        gl_FragColor = tempColor;
-        // gl_FragColor = tempColor * (texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord));
+        if (texture) gl_FragColor = tempColor ;
+        else gl_FragColor = tempColor * (texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord)* texture2D(Tex2, fTexCoord));
     }
 
 }

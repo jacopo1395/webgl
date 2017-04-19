@@ -10,7 +10,7 @@ var numChecks = 8;
 
 var program;
 
-var texture1, texture2;
+var texture1, texture2, texture3;
 var t1, t2;
 
 var c;
@@ -89,6 +89,17 @@ for (var i = 0; i < texSize; i++) {
     }
 }
 
+var image3 = new Uint8Array(4 * texSize * texSize);
+
+for (var i = 0; i < texSize; i++) {
+    for (var j = 0; j < texSize; j++) {
+        image3[4 * i * texSize + 4 * j] = Math.random()*128;
+        image3[4 * i * texSize + 4 * j + 1] = Math.random()*128;
+        image3[4 * i * texSize + 4 * j + 2] = Math.random()*128;
+        image3[4 * i * texSize + 4 * j + 3] = Math.random()*128;
+    }
+}
+
 var pointsArray = [];
 var colorsArray = [];
 var texCoordsArray = [];
@@ -132,6 +143,9 @@ var type = true; //true= Phong  |  false = Gouraud
 var typeLoc, typeLoc2;
 var thetaLoc;
 
+var texture = false;
+var textureLoc;
+
 function configureTexture() {
     texture1 = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture1);
@@ -146,6 +160,15 @@ function configureTexture() {
     gl.bindTexture(gl.TEXTURE_2D, texture2);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, texSize, texSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, image2);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER,
+        gl.NEAREST_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+    texture3 = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture3);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, texSize, texSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, image3);
     gl.generateMipmap(gl.TEXTURE_2D);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER,
         gl.NEAREST_MIPMAP_LINEAR);
@@ -330,9 +353,15 @@ window.onload = function init() {
     gl.bindTexture(gl.TEXTURE_2D, texture2);
     gl.uniform1i(gl.getUniformLocation(program, "Tex1"), 1);
 
+    gl.activeTexture(gl.TEXTURE3);
+    gl.bindTexture(gl.TEXTURE_2D, texture3);
+    gl.uniform1i(gl.getUniformLocation(program, "Tex2"), 0);
+
     thetaLoc = gl.getUniformLocation(program, "theta");
     typeLoc = gl.getUniformLocation(program, "type");
     typeLoc2 = gl.getUniformLocation(program, "type2");
+
+    textureLoc = gl.getUniformLocation(program, "texture");
 
     positionalLoc = gl.getUniformLocation(program, "positional");
     directionalLoc = gl.getUniformLocation(program, "directional");
@@ -370,6 +399,9 @@ window.onload = function init() {
     document.getElementById("ButtonA").onclick = function() {
         spotlight = !spotlight;
     };
+    document.getElementById("ButtonTex").onclick = function() {
+        texture = !texture;
+    };
 
     render();
 }
@@ -380,6 +412,7 @@ var render = function() {
     gl.uniform3fv(thetaLoc, theta);
     gl.uniform1i(typeLoc, type);
     gl.uniform1i(typeLoc2, type);
+    gl.uniform1i(textureLoc, texture);
 
     gl.uniform1i(positionalLoc, positional);
     gl.uniform1i(positionalLoc2, positional);
