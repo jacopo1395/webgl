@@ -16,22 +16,33 @@
 attribute  vec4 vPosition;
 attribute  vec4 vColor;
 attribute  vec2 vTexCoord;
+attribute  vec4 vNormal;
 
 varying vec4 fColor;
 varying vec2 fTexCoord;
 
 uniform vec3 theta;
 
-attribute vec4 vNormal;
-varying vec3 N, L, E;
-uniform mat4 modelViewMatrix;
-uniform mat4 projectionMatrix;
-uniform vec4 lightPosition;
+varying vec3 Np, Lp, Ep;
+varying vec3 Nd, Ld, Ed;
+varying vec3 Ns, Ls, Es;
 
-uniform vec4 ambientProduct;
-uniform vec4 diffuseProduct;
-uniform vec4 specularProduct;
 uniform float shininess;
+
+uniform vec4 lightPositionP;
+uniform vec4 ambientProductP;
+uniform vec4 diffuseProductP;
+uniform vec4 specularProductP;
+
+uniform vec4 lightPositionD;
+uniform vec4 ambientProductD;
+uniform vec4 diffuseProductD;
+uniform vec4 specularProductD;
+
+uniform vec4 lightPositionS;
+uniform vec4 ambientProductS;
+uniform vec4 diffuseProductS;
+uniform vec4 specularProductS;
 
 uniform bool type;
 
@@ -39,8 +50,48 @@ uniform bool positional;
 uniform bool directional;
 uniform bool spotlight;
 
-void main()
-{
+vec4 lightPhong(mat4 modelViewMatrix, vec4 lightPosition, vec4 ambientProduct,
+                vec4 diffuseProduct, vec4 specularProduct, float l){
+    vec4 tempColor;
+
+    vec3 pos = -(modelViewMatrix * vPosition).xyz;
+    vec3 light = lightPosition.xyz;
+    vec3 L;
+    if (l==1.0) L = normalize( light - pos ); //normalize(light) direzionale
+    if (l==2.0) L = normalize (light);
+    vec3 E = -pos;
+    vec3 N = normalize( (modelViewMatrix*vNormal).xyz);
+
+    vec3 H = normalize( L + E );
+    vec4 ambient = ambientProduct;
+    float Kd = max( dot(L, N), 0.0 );
+    vec4 diffuse = Kd*diffuseProduct;
+    float Ks = pow( max(dot(N, H), 0.0), shininess );
+    vec4 specular = Ks * specularProduct;
+    if( dot(L, N) < 0.0 ) specular = vec4(0.0, 0.0, 0.0, 1.0);
+
+    tempColor = ambient + diffuse +specular;
+    tempColor.a=1.0;
+    return tempColor;
+
+}
+
+void lightGouraud(mat4 modelViewMatrix, vec4 lightPosition, float l){
+    vec3 pos = -(modelViewMatrix * vPosition).xyz;
+    vec3 light = lightPosition.xyz;
+    if(l==1.0){
+         Lp = normalize( light - pos ); //normalize(light) direzionale
+         Ep = -pos;
+         Np = normalize( (modelViewMatrix*vNormal).xyz);
+     }
+    if(l==2.0){
+         Ld = normalize(light);
+         Ed = -pos;
+         Nd = normalize( (modelViewMatrix*vNormal).xyz);
+     }
+}
+
+void main(){
 
     // Compute the sines and cosines of theta for each of
     //   the three axes in one computation.
@@ -65,44 +116,35 @@ void main()
 		    0.0,  0.0, 1.0, 0.0,
 		    0.0,  0.0, 0.0, 1.0 );
 
-    vec4 tempColor;
-    mat4 modelViewMatrix2;
+    mat4 modelViewMatrix = rz * ry * rx ;
 
     if(type){ //Phong
-            modelViewMatrix2 = rz * ry * rx ;
-            vec3 pos = -(modelViewMatrix2 * vPosition).xyz;
-            vec3 light = lightPosition.xyz;
-            if(positional) L = normalize( light - pos ); //normalize(light) direzionale
-            else L = normalize(light);
-            E = -pos;
-            N = normalize( (modelViewMatrix2*vNormal).xyz);
-            gl_Position =  modelViewMatrix2 * vPosition;
+        vec4 positionalColor;
+        vec4 directionalColor;
+        vec4 tempColor=vColor;;
+        if(positional) {
+            positionalColor = lightPhong(modelViewMatrix, lightPositionP, ambientProductP,
+                                    diffuseProductP,  specularProductP, 1.0);
+            tempColor += positionalColor;
+        }
+        if(directional) {
+            directionalColor = lightPhong(modelViewMatrix, lightPositionD, ambientProductD,
+                                    diffuseProductD,  specularProductD, 2.0);
+            tempColor += directionalColor;
+        }
 
-            vec3 H = normalize( L + E );
-            vec4 ambient = ambientProduct;
-            float Kd = max( dot(L, N), 0.0 );
-            vec4 diffuse = Kd*diffuseProduct;
-            float Ks = pow( max(dot(N, H), 0.0), shininess );
-            vec4 specular = Ks * specularProduct;
-            if( dot(L, N) < 0.0 ) specular = vec4(0.0, 0.0, 0.0, 1.0);
 
-            tempColor =  vColor+ ambient + diffuse +specular;
-            tempColor.a=1.0;
-            fColor = tempColor;
-            fTexCoord = vTexCoord;
-            gl_Position = modelViewMatrix2 * vPosition;
-            gl_Position.z = -gl_Position.z;
+        fColor = tempColor;
+        fTexCoord = vTexCoord;
+        gl_Position = modelViewMatrix * vPosition;
+        gl_Position.z = -gl_Position.z;
 
     }
     else{ //Gouraud
-        modelViewMatrix2 = rz * ry * rx ;
-        vec3 pos = -(modelViewMatrix2 * vPosition).xyz;
-        vec3 light = lightPosition.xyz;
-        if(positional) L = normalize( light - pos ); //normalize(light) direzionale
-        else L = normalize(light);
-        E = -pos;
-        N = normalize( (modelViewMatrix2*vNormal).xyz);
-        gl_Position =  modelViewMatrix2 * vPosition;
+        if(positional)  lightGouraud( modelViewMatrix,  lightPositionP, 1.0);
+        if(directional)  lightGouraud( modelViewMatrix,  lightPositionD, 2.0);
+
+        gl_Position =  modelViewMatrix * vPosition;
         gl_Position.z = -gl_Position.z;
         fColor=vColor;
         fTexCoord = vTexCoord;
@@ -122,11 +164,23 @@ varying  vec2 fTexCoord;
 uniform sampler2D Tex0;
 uniform sampler2D Tex1;
 
-uniform vec4 ambientProduct2;
-uniform vec4 diffuseProduct2;
-uniform vec4 specularProduct2;
 uniform float shininess2;
-varying vec3 N, L, E;
+
+uniform vec4 ambientProductP2;
+uniform vec4 diffuseProductP2;
+uniform vec4 specularProductP2;
+
+uniform vec4 ambientProductD2;
+uniform vec4 diffuseProductD2;
+uniform vec4 specularProductD2;
+
+uniform vec4 ambientProductS2;
+uniform vec4 diffuseProductS2;
+uniform vec4 specularProductS2;
+
+varying vec3 Np, Lp, Ep;
+varying vec3 Nd, Ld, Ed;
+varying vec3 Ns, Ls, Es;
 
 uniform bool type2;
 
@@ -134,26 +188,49 @@ uniform bool positional2;
 uniform bool directional2;
 uniform bool spotlight2;
 
-void
-main()
-{
+vec4 lightGouraud2(vec4 ambientProduct, vec4 diffuseProduct, vec4 specularProduct, float l){
+    vec3 L,N,E;
+    if(l==1.0){
+        L=Lp; N=Np; E=Ep;
+    }
+    if(l==2.0){
+        L=Ld; N=Nd; E=Ed;
+    }
+    vec4 fColor2;
+    vec3 H = normalize( L + E );
+    vec4 ambient = ambientProduct;
+    float Kd = max( dot(L, N), 0.0 );
+    vec4 diffuse = Kd * diffuseProduct;
+    float Ks = pow( max(dot(N, H), 0.0), shininess2 );
+    vec4 specular = Ks * specularProduct;
+    if( dot(L, N) < 0.0 ) specular = vec4(0.0, 0.0, 0.0, 1.0);
+    fColor2 =  ambient + diffuse +specular;
+    fColor2.a=1.0;
+    return fColor2;
+
+}
+
+void main(){
     if(type2){ //Phong
-        // gl_FragColor = fColor;
-        gl_FragColor = fColor*(texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord));
+        gl_FragColor = fColor;
+        // gl_FragColor = fColor*(texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord));
     }
     else{  //Gouraud
-        vec4 fColor2;
-        vec3 H = normalize( L + E );
-        vec4 ambient2 = ambientProduct2;
-        float Kd2 = max( dot(L, N), 0.0 );
-        vec4 diffuse2 = Kd2*diffuseProduct2;
-        float Ks2 = pow( max(dot(N, H), 0.0), shininess2 );
-        vec4 specular2 = Ks2 * specularProduct2;
-        if( dot(L, N) < 0.0 ) specular2 = vec4(0.0, 0.0, 0.0, 1.0);
-        fColor2 =  fColor + ambient2 + diffuse2 +specular2;
-        fColor2.a = 1.0;
-        // gl_FragColor = fColor2;
-        gl_FragColor = (texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord))*fColor2;
+        vec4 tempColor=fColor;
+        vec4 positionalColor;
+        vec4 directionalColor;
+
+        if(positional2){
+            positionalColor = lightGouraud2(ambientProductP2, diffuseProductP2, specularProductP2, 1.0 );
+            tempColor += positionalColor;
+
+        }
+        if(directional2){
+            directionalColor = lightGouraud2(ambientProductD2, diffuseProductD2, specularProductD2, 2.0 );
+            tempColor += directionalColor;
+        }
+        gl_FragColor = tempColor;
+        // gl_FragColor = tempColor * (texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord));
     }
 
 }

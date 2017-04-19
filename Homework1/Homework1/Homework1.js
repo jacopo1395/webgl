@@ -26,7 +26,7 @@ var flag = false;
 */
 
 var positional = true;
-var directional = true;
+var directional = false;
 var spotlight = true;
 
 var positionalLoc, positionalLoc2;
@@ -288,19 +288,28 @@ window.onload = function init() {
     var specularProduct = mult(lightSpecular, materialSpecular);
 
 
-    gl.uniform4fv(gl.getUniformLocation(program, "ambientProduct"), flatten(ambientProduct));
-    gl.uniform4fv(gl.getUniformLocation(program, "diffuseProduct"), flatten(diffuseProduct));
-    gl.uniform4fv(gl.getUniformLocation(program, "specularProduct"), flatten(specularProduct));
-    gl.uniform4fv(gl.getUniformLocation(program, "lightPosition"), flatten(lightPosition));
     gl.uniform1f(gl.getUniformLocation(program, "shininess"), materialShininess);
 
+    gl.uniform4fv(gl.getUniformLocation(program, "ambientProductP"), flatten(ambientProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "diffuseProductP"), flatten(diffuseProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "specularProductP"), flatten(specularProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "lightPositionP"), flatten(lightPosition));
+
+    gl.uniform4fv(gl.getUniformLocation(program, "ambientProductD"), flatten(ambientProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "diffuseProductD"), flatten(diffuseProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "specularProductD"), flatten(specularProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "lightPositionD"), flatten(lightPosition));
+
     //2
-    gl.uniform4fv(gl.getUniformLocation(program, "ambientProduct2"), flatten(ambientProduct));
-    gl.uniform4fv(gl.getUniformLocation(program, "diffuseProduct2"), flatten(diffuseProduct));
-    gl.uniform4fv(gl.getUniformLocation(program, "specularProduct2"), flatten(specularProduct));
-    gl.uniform4fv(gl.getUniformLocation(program, "lightPosition2"), flatten(lightPosition));
     gl.uniform1f(gl.getUniformLocation(program, "shininess2"), materialShininess);
 
+    gl.uniform4fv(gl.getUniformLocation(program, "ambientProductP2"), flatten(ambientProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "diffuseProductP2"), flatten(diffuseProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "specularProductP2"), flatten(specularProduct));
+
+    gl.uniform4fv(gl.getUniformLocation(program, "ambientProductD2"), flatten(ambientProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "diffuseProductD2"), flatten(diffuseProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "specularProductD2"), flatten(specularProduct));
 
     // gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"), false, flatten(projection));
 
