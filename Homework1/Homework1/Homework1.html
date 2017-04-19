@@ -121,7 +121,8 @@ void main(){
     if(type){ //Phong
         vec4 positionalColor;
         vec4 directionalColor;
-        vec4 tempColor=vColor;;
+        vec4 tempColor=vColor;
+
         if(positional) {
             positionalColor = lightPhong(modelViewMatrix, lightPositionP, ambientProductP,
                                     diffuseProductP,  specularProductP, 1.0);
@@ -229,6 +230,8 @@ void main(){
             directionalColor = lightGouraud2(ambientProductD2, diffuseProductD2, specularProductD2, 2.0 );
             tempColor += directionalColor;
         }
+
+
         gl_FragColor = tempColor;
         // gl_FragColor = tempColor * (texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord));
     }
