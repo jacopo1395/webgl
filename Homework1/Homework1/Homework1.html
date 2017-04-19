@@ -72,7 +72,8 @@ void main()
             modelViewMatrix2 = rz * ry * rx ;
             vec3 pos = -(modelViewMatrix2 * vPosition).xyz;
             vec3 light = lightPosition.xyz;
-            L = normalize( light - pos ); //normalize(light) direzionale
+            if(positional) L = normalize( light - pos ); //normalize(light) direzionale
+            else L = normalize(light);
             E = -pos;
             N = normalize( (modelViewMatrix2*vNormal).xyz);
             gl_Position =  modelViewMatrix2 * vPosition;
@@ -85,7 +86,7 @@ void main()
             vec4 specular = Ks * specularProduct;
             if( dot(L, N) < 0.0 ) specular = vec4(0.0, 0.0, 0.0, 1.0);
 
-            tempColor =  ambient + diffuse +specular;
+            tempColor =  vColor+ ambient + diffuse +specular;
             tempColor.a=1.0;
             fColor = tempColor;
             fTexCoord = vTexCoord;
@@ -97,13 +98,14 @@ void main()
         modelViewMatrix2 = rz * ry * rx ;
         vec3 pos = -(modelViewMatrix2 * vPosition).xyz;
         vec3 light = lightPosition.xyz;
-        L = normalize( light - pos );
+        if(positional) L = normalize( light - pos ); //normalize(light) direzionale
+        else L = normalize(light);
         E = -pos;
         N = normalize( (modelViewMatrix2*vNormal).xyz);
         gl_Position =  modelViewMatrix2 * vPosition;
         gl_Position.z = -gl_Position.z;
         fColor=vColor;
-
+        fTexCoord = vTexCoord;
     }
 
 
@@ -136,21 +138,22 @@ void
 main()
 {
     if(type2){ //Phong
-        gl_FragColor = fColor;
-        // gl_FragColor = tempColor*(texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord));
+        // gl_FragColor = fColor;
+        gl_FragColor = fColor*(texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord));
     }
     else{  //Gouraud
         vec4 fColor2;
-        vec3 H2 = normalize( L + E );
+        vec3 H = normalize( L + E );
         vec4 ambient2 = ambientProduct2;
         float Kd2 = max( dot(L, N), 0.0 );
         vec4 diffuse2 = Kd2*diffuseProduct2;
-        float Ks2 = pow( max(dot(N, H2), 0.0), shininess2 );
+        float Ks2 = pow( max(dot(N, H), 0.0), shininess2 );
         vec4 specular2 = Ks2 * specularProduct2;
         if( dot(L, N) < 0.0 ) specular2 = vec4(0.0, 0.0, 0.0, 1.0);
-        fColor2 =  ambient2 + diffuse2 +specular2;
+        fColor2 =  fColor + ambient2 + diffuse2 +specular2;
         fColor2.a = 1.0;
-        gl_FragColor = fColor2;
+        // gl_FragColor = fColor2;
+        gl_FragColor = (texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord))*fColor2;
     }
 
 }
