@@ -15,7 +15,7 @@ var t1, t2;
 
 var c;
 
-var flag = true;
+var flag = false;
 
 /*
 ███    ███ ██    ██
@@ -34,7 +34,6 @@ var modelView, projection;
 var modelViewMatrix, projectionMatrix;
 var modelViewMatrixLoc, projectionMatrixLoc;
 var normalMatrix, normalMatrixLoc;
-
 
 
 var lightPosition = vec4(1.0, 1.0, 1.0, 0.0 );
@@ -121,7 +120,8 @@ var zAxis = 2;
 var axis = xAxis;
 
 var theta = [45.0, 45.0, 45.0];
-
+var type = true; //true= Phong  |  false = Gouraud
+var typeLoc, typeLoc2;
 var thetaLoc;
 
 function configureTexture() {
@@ -285,6 +285,12 @@ window.onload = function init() {
     gl.uniform4fv(gl.getUniformLocation(program, "specularProduct"), flatten(specularProduct));
     gl.uniform4fv(gl.getUniformLocation(program, "lightPosition"), flatten(lightPosition));
     gl.uniform1f(gl.getUniformLocation(program, "shininess"), materialShininess);
+    //2
+    gl.uniform4fv(gl.getUniformLocation(program, "ambientProduct2"), flatten(ambientProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "diffuseProduct2"), flatten(diffuseProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "specularProduct2"), flatten(specularProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "lightPosition2"), flatten(lightPosition));
+    gl.uniform1f(gl.getUniformLocation(program, "shininess2"), materialShininess);
 
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"), false, flatten(projection));
 
@@ -306,6 +312,8 @@ window.onload = function init() {
     gl.uniform1i(gl.getUniformLocation(program, "Tex1"), 1);
 
     thetaLoc = gl.getUniformLocation(program, "theta");
+    typeLoc = gl.getUniformLocation(program, "type");
+    typeLoc2 = gl.getUniformLocation(program, "type2");
 
 
     document.getElementById("ButtonX").onclick = function() {
@@ -320,6 +328,9 @@ window.onload = function init() {
     document.getElementById("ButtonT").onclick = function() {
         flag = !flag;
     };
+    document.getElementById("ButtonL").onclick = function() {
+        type = !type;
+    };
 
     render();
 }
@@ -328,13 +339,15 @@ var render = function() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     if (flag) theta[axis] += 2.0;
     gl.uniform3fv(thetaLoc, theta);
-    modelView = mat4();
-    modelView = mult(modelView, rotate(theta[xAxis], [1, 0, 0] ));
-    modelView = mult(modelView, rotate(theta[yAxis], [0, 1, 0] ));
-    modelView = mult(modelView, rotate(theta[zAxis], [0, 0, 1] ));
-
-    gl.uniformMatrix4fv( gl.getUniformLocation(program,
-            "modelViewMatrix"), false, flatten(modelView) );
+    gl.uniform1i(typeLoc, type);
+    gl.uniform1i(typeLoc2, type);
+    // modelView = mat4();
+    // modelView = mult(modelView, rotate(theta[xAxis], [1, 0, 0] ));
+    // modelView = mult(modelView, rotate(theta[yAxis], [0, 1, 0] ));
+    // modelView = mult(modelView, rotate(theta[zAxis], [0, 0, 1] ));
+    //
+    // gl.uniformMatrix4fv( gl.getUniformLocation(program,
+    //         "modelViewMatrix"), false, flatten(modelView) );
     gl.drawArrays(gl.TRIANGLES, 0, numVertices);
     requestAnimFrame(render);
 }
