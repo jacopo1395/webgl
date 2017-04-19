@@ -6,6 +6,9 @@
 <button id="ButtonZ">Rotate Z</button>
 <button id="ButtonT">Toggle Rotation</button>
 <button id="ButtonL">Phong/Gouraud</button>
+<button id="ButtonP">Positional</button>
+<button id="ButtonD">Directional</button>
+<button id="ButtonA">Spotlight</button>
 
 
 <script id="vertex-shader" type="x-shader/x-vertex">
@@ -32,7 +35,9 @@ uniform float shininess;
 
 uniform bool type;
 
-
+uniform bool positional;
+uniform bool directional;
+uniform bool spotlight;
 
 void main()
 {
@@ -80,7 +85,7 @@ void main()
             vec4 specular = Ks * specularProduct;
             if( dot(L, N) < 0.0 ) specular = vec4(0.0, 0.0, 0.0, 1.0);
 
-            tempColor = vColor + ambient + diffuse +specular;
+            tempColor =  ambient + diffuse +specular;
             tempColor.a=1.0;
             fColor = tempColor;
             fTexCoord = vTexCoord;
@@ -96,6 +101,8 @@ void main()
         E = -pos;
         N = normalize( (modelViewMatrix2*vNormal).xyz);
         gl_Position =  modelViewMatrix2 * vPosition;
+        gl_Position.z = -gl_Position.z;
+        fColor=vColor;
 
     }
 
@@ -117,28 +124,31 @@ uniform vec4 ambientProduct2;
 uniform vec4 diffuseProduct2;
 uniform vec4 specularProduct2;
 uniform float shininess2;
-uniform vec3 N2, L2, E2;
+varying vec3 N, L, E;
 
 uniform bool type2;
 
+uniform bool positional2;
+uniform bool directional2;
+uniform bool spotlight2;
 
 void
 main()
 {
-    if(type2){
+    if(type2){ //Phong
         gl_FragColor = fColor;
         // gl_FragColor = tempColor*(texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord));
     }
-    else{
+    else{  //Gouraud
         vec4 fColor2;
-        vec3 H2 = normalize( L2 + E2 );
+        vec3 H2 = normalize( L + E );
         vec4 ambient2 = ambientProduct2;
-        float Kd2 = max( dot(L2, N2), 0.0 );
+        float Kd2 = max( dot(L, N), 0.0 );
         vec4 diffuse2 = Kd2*diffuseProduct2;
-        float Ks2 = pow( max(dot(N2, H2), 0.0), shininess2 );
+        float Ks2 = pow( max(dot(N, H2), 0.0), shininess2 );
         vec4 specular2 = Ks2 * specularProduct2;
-        if( dot(L2, N2) < 0.0 ) specular2 = vec4(0.0, 0.0, 0.0, 1.0);
-        fColor2 = ambient2 + diffuse2 +specular2;
+        if( dot(L, N) < 0.0 ) specular2 = vec4(0.0, 0.0, 0.0, 1.0);
+        fColor2 =  ambient2 + diffuse2 +specular2;
         fColor2.a = 1.0;
         gl_FragColor = fColor2;
     }

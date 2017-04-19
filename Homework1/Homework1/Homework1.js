@@ -25,6 +25,14 @@ var flag = false;
 ██      ██    ██
 */
 
+var positional = true;
+var directional = true;
+var spotlight = true;
+
+var positionalLoc, positionalLoc2;
+var directionalLoc, directionalLoc2;
+var spotlighLoc, spotlighLoc2;
+
 var normalsArray = [];
 
 var ambientColor, diffuseColor, specularColor;
@@ -264,7 +272,7 @@ window.onload = function init() {
     gl.enableVertexAttribArray(vTexCoord);
 
 
-    projection = ortho(-1, 1, -1, 1, -100, 100);
+    // projection = ortho(-1, 1, -1, 1, -100, 100);
 
     /*
     ███    ███ ██    ██
@@ -285,6 +293,7 @@ window.onload = function init() {
     gl.uniform4fv(gl.getUniformLocation(program, "specularProduct"), flatten(specularProduct));
     gl.uniform4fv(gl.getUniformLocation(program, "lightPosition"), flatten(lightPosition));
     gl.uniform1f(gl.getUniformLocation(program, "shininess"), materialShininess);
+
     //2
     gl.uniform4fv(gl.getUniformLocation(program, "ambientProduct2"), flatten(ambientProduct));
     gl.uniform4fv(gl.getUniformLocation(program, "diffuseProduct2"), flatten(diffuseProduct));
@@ -292,7 +301,8 @@ window.onload = function init() {
     gl.uniform4fv(gl.getUniformLocation(program, "lightPosition2"), flatten(lightPosition));
     gl.uniform1f(gl.getUniformLocation(program, "shininess2"), materialShininess);
 
-    gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"), false, flatten(projection));
+
+    // gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"), false, flatten(projection));
 
     /*
 
@@ -315,6 +325,14 @@ window.onload = function init() {
     typeLoc = gl.getUniformLocation(program, "type");
     typeLoc2 = gl.getUniformLocation(program, "type2");
 
+    positionalLoc = gl.getUniformLocation(program, "positional");
+    directionalLoc = gl.getUniformLocation(program, "directional");
+    spotlighLoc = gl.getUniformLocation(program, "spotlight");
+
+    positionalLoc2 = gl.getUniformLocation(program, "positional2");
+    directionalLoc2 = gl.getUniformLocation(program, "directional2");
+    spotlighLoc2 = gl.getUniformLocation(program, "spotlight2");
+
 
     document.getElementById("ButtonX").onclick = function() {
         axis = xAxis;
@@ -332,6 +350,18 @@ window.onload = function init() {
         type = !type;
     };
 
+    document.getElementById("ButtonP").onclick = function() {
+        positional = !positional;
+    };
+
+    document.getElementById("ButtonD").onclick = function() {
+        directional = !directional;
+    };
+
+    document.getElementById("ButtonA").onclick = function() {
+        spotlight = !spotlight;
+    };
+
     render();
 }
 
@@ -341,6 +371,15 @@ var render = function() {
     gl.uniform3fv(thetaLoc, theta);
     gl.uniform1i(typeLoc, type);
     gl.uniform1i(typeLoc2, type);
+
+    gl.uniform1i(positionalLoc, positional);
+    gl.uniform1i(positionalLoc2, positional);
+
+    gl.uniform1i(directionalLoc, directional);
+    gl.uniform1i(directionalLoc2, directional);
+
+    gl.uniform1i(spotlighLoc, spotlight);
+    gl.uniform1i(spotlighLoc2, spotlight);
     // modelView = mat4();
     // modelView = mult(modelView, rotate(theta[xAxis], [1, 0, 0] ));
     // modelView = mult(modelView, rotate(theta[yAxis], [0, 1, 0] ));
