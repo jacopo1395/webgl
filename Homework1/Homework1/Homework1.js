@@ -73,7 +73,7 @@ for (var i = 0; i < texSize; i++) {
         image1[4 * i * texSize + 4 * j] = c;
         image1[4 * i * texSize + 4 * j + 1] = c;
         image1[4 * i * texSize + 4 * j + 2] = c;
-        image1[4 * i * texSize + 4 * j + 3] = 255;
+        image1[4 * i * texSize + 4 * j + 3] = 255; //255
     }
 }
 
@@ -139,7 +139,7 @@ var zAxis = 2;
 var axis = xAxis;
 
 var theta = [45.0, 45.0, 45.0];
-var type = true; //true= Phong  |  false = Gouraud
+var type = false; //true= Phong  |  false = Gouraud
 var typeLoc, typeLoc2;
 var thetaLoc;
 
@@ -353,9 +353,9 @@ window.onload = function init() {
     gl.bindTexture(gl.TEXTURE_2D, texture2);
     gl.uniform1i(gl.getUniformLocation(program, "Tex1"), 1);
 
-    gl.activeTexture(gl.TEXTURE3);
+    gl.activeTexture(gl.TEXTURE2);
     gl.bindTexture(gl.TEXTURE_2D, texture3);
-    gl.uniform1i(gl.getUniformLocation(program, "Tex2"), 0);
+    gl.uniform1i(gl.getUniformLocation(program, "Tex2"), 2);
 
     thetaLoc = gl.getUniformLocation(program, "theta");
     typeLoc = gl.getUniformLocation(program, "type");
