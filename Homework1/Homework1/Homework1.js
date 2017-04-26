@@ -27,7 +27,7 @@ var flag = false;
 
 var positional = true;
 var directional = false;
-var spotlight = true;
+var spotlight = false;
 
 var positionalLoc, positionalLoc2;
 var directionalLoc, directionalLoc2;
@@ -44,10 +44,13 @@ var modelViewMatrixLoc, projectionMatrixLoc;
 var normalMatrix, normalMatrixLoc;
 
 
-var lightPosition = vec4(1.0, 1.0, 1.0, 0.0 );
+var lightPosition = vec4(0.0, 0.0, 2.0, 0.0 );
 var lightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+
+var lightDirection = vec4( 0.0, 0.0, -1.0, 1.0 );
+var cutOff = 0.90;
 
 var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
 var materialDiffuse = vec4( 1.0, 0.8, 0.0, 1.0);
@@ -139,7 +142,7 @@ var zAxis = 2;
 var axis = xAxis;
 
 var theta = [45.0, 45.0, 45.0];
-var type = false; //true= Phong  |  false = Gouraud
+var type = true; //false= Phong  |  true = Gouraud
 var typeLoc, typeLoc2;
 var thetaLoc;
 
@@ -323,6 +326,14 @@ window.onload = function init() {
     gl.uniform4fv(gl.getUniformLocation(program, "specularProductD"), flatten(specularProduct));
     gl.uniform4fv(gl.getUniformLocation(program, "lightPositionD"), flatten(lightPosition));
 
+    gl.uniform4fv(gl.getUniformLocation(program, "ambientProductS"), flatten(ambientProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "diffuseProductS"), flatten(diffuseProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "specularProductS"), flatten(specularProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "lightPositionS"), flatten(lightPosition));
+
+    gl.uniform4fv(gl.getUniformLocation(program, "lightDirectionS"), flatten(lightDirection));
+    gl.uniform1f(gl.getUniformLocation(program, "cutOff"), cutOff);
+
     //2
     gl.uniform1f(gl.getUniformLocation(program, "shininess2"), materialShininess);
 
@@ -333,6 +344,10 @@ window.onload = function init() {
     gl.uniform4fv(gl.getUniformLocation(program, "ambientProductD2"), flatten(ambientProduct));
     gl.uniform4fv(gl.getUniformLocation(program, "diffuseProductD2"), flatten(diffuseProduct));
     gl.uniform4fv(gl.getUniformLocation(program, "specularProductD2"), flatten(specularProduct));
+
+    gl.uniform4fv(gl.getUniformLocation(program, "ambientProductS2"), flatten(ambientProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "diffuseProductS2"), flatten(diffuseProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "specularProductS2"), flatten(specularProduct));
 
     // gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"), false, flatten(projection));
 
@@ -386,6 +401,9 @@ window.onload = function init() {
     };
     document.getElementById("ButtonL").onclick = function() {
         type = !type;
+        if(type)
+            document.getElementById("type").innerHTML="Gouraud";
+        else document.getElementById("type").innerHTML="Phong";
     };
 
     document.getElementById("ButtonP").onclick = function() {

@@ -5,11 +5,12 @@
 <button id="ButtonY">Rotate Y</button>
 <button id="ButtonZ">Rotate Z</button>
 <button id="ButtonT">Toggle Rotation</button>
-<button id="ButtonL">Phong/Gouraud</button>
+<button id="ButtonL">Gouraud/Phong</button>
 <button id="ButtonP">Positional</button>
 <button id="ButtonD">Directional</button>
 <button id="ButtonA">Spotlight</button>
 <button id="ButtonTex">Texture</button>
+<div id= "type">Gouraud</div>
 
 
 <script id="vertex-shader" type="x-shader/x-vertex">
@@ -45,13 +46,16 @@ uniform vec4 ambientProductS;
 uniform vec4 diffuseProductS;
 uniform vec4 specularProductS;
 
+uniform vec4 lightDirectionS;
+uniform float cutOff;
+
 uniform bool type;
 
 uniform bool positional;
 uniform bool directional;
 uniform bool spotlight;
 
-vec4 lightPhong(mat4 modelViewMatrix, vec4 lightPosition, vec4 ambientProduct,
+vec4 lightGouraud(mat4 modelViewMatrix, vec4 lightPosition, vec4 ambientProduct,
                 vec4 diffuseProduct, vec4 specularProduct, float l){
     vec4 tempColor;
 
@@ -60,7 +64,8 @@ vec4 lightPhong(mat4 modelViewMatrix, vec4 lightPosition, vec4 ambientProduct,
     vec3 L;
     if (l==1.0) L = normalize( light - pos ); //normalize(light) direzionale
     if (l==2.0) L = normalize (light);
-    vec3 E = -pos;
+    //if (l==3.0) L = normalize(lightPosition);
+    vec3 E = normalize(-pos);
     vec3 N = normalize( (modelViewMatrix*vNormal).xyz);
 
     vec3 H = normalize( L + E );
@@ -69,15 +74,13 @@ vec4 lightPhong(mat4 modelViewMatrix, vec4 lightPosition, vec4 ambientProduct,
     vec4 diffuse = Kd*diffuseProduct;
     float Ks = pow( max(dot(N, H), 0.0), shininess );
     vec4 specular = Ks * specularProduct;
-    if( dot(L, N) < 0.0 ) specular = vec4(0.0, 0.0, 0.0, 1.0);
-
-    tempColor = ambient + diffuse +specular;
+    tempColor = ambient + diffuse ;
     tempColor.a=1.0;
     return tempColor;
 
 }
 
-void lightGouraud(mat4 modelViewMatrix, vec4 lightPosition, float l){
+void lightPhong(mat4 modelViewMatrix, vec4 lightPosition, float l){
     vec3 pos = -(modelViewMatrix * vPosition).xyz;
     vec3 light = lightPosition.xyz;
     if(l==1.0){
@@ -119,20 +122,45 @@ void main(){
 
     mat4 modelViewMatrix = rz * ry * rx ;
 
-    if(type){ //Phong
+    if(type){ //Gouraud
         vec4 positionalColor;
         vec4 directionalColor;
+        vec4 spotlightColor;
         vec4 tempColor=vColor;
 
         if(positional) {
-            positionalColor = lightPhong(modelViewMatrix, lightPositionP, ambientProductP,
+            positionalColor = lightGouraud(modelViewMatrix, lightPositionP, ambientProductP,
                                     diffuseProductP,  specularProductP, 1.0);
             tempColor += positionalColor;
         }
         if(directional) {
-            directionalColor = lightPhong(modelViewMatrix, lightPositionD, ambientProductD,
+            directionalColor = lightGouraud(modelViewMatrix, lightPositionD, ambientProductD,
                                     diffuseProductD,  specularProductD, 2.0);
             tempColor += directionalColor;
+        }
+        if(spotlight) {
+            vec3 pos = -(modelViewMatrix * vPosition).xyz;
+            vec3 light = lightPositionS.xyz;
+            vec3 L;
+            L = normalize(light);
+            vec3 N = normalize( (modelViewMatrix*vNormal).xyz);
+            vec3 E = normalize(-pos);
+            vec3 H = normalize(L + E);
+            vec3 D = lightDirectionS.xyz;
+            vec4 ambient = ambientProductS;
+            float Kd = max( dot(L, N), 0.0 );
+            vec4 diffuse = Kd*diffuseProductS;
+            float Ks = pow( max(dot(N, H), 0.0), shininess );
+            vec4 specular = Ks * specularProductS;
+            if( dot(L, N) < 0.0 ) specular = vec4(0.0, 0.0, 0.0, 1.0);
+            float effect = dot(normalize(D), normalize(L+E));
+            if(effect>cutOff){
+                tempColor += ambient + diffuse +specular;
+                tempColor.a = 1.0;
+            }
+
+
+
         }
 
 
@@ -142,9 +170,9 @@ void main(){
         gl_Position.z = -gl_Position.z;
 
     }
-    else{ //Gouraud
-        if(positional)  lightGouraud( modelViewMatrix,  lightPositionP, 1.0);
-        if(directional)  lightGouraud( modelViewMatrix,  lightPositionD, 2.0);
+    else{ //Phong
+        if(positional)  lightPhong( modelViewMatrix,  lightPositionP, 1.0);
+        if(directional)  lightPhong( modelViewMatrix,  lightPositionD, 2.0);
 
         gl_Position =  modelViewMatrix * vPosition;
         gl_Position.z = -gl_Position.z;
@@ -193,7 +221,7 @@ uniform bool directional2;
 uniform bool spotlight2;
 
 
-vec4 lightGouraud2(vec4 ambientProduct, vec4 diffuseProduct, vec4 specularProduct, float l){
+vec4 lightPhong2(vec4 ambientProduct, vec4 diffuseProduct, vec4 specularProduct, float l){
     vec3 L,N,E;
     if(l==1.0){
         L=Lp; N=Np; E=Ep;
@@ -216,23 +244,23 @@ vec4 lightGouraud2(vec4 ambientProduct, vec4 diffuseProduct, vec4 specularProduc
 }
 
 void main(){
-    if(type2){ //Phong
+    if(type2){ //Gouraud
         if(texture)  gl_FragColor = fColor;
-        else   gl_FragColor = fColor * (texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord)* texture2D(Tex2, fTexCoord));
+        else   gl_FragColor = (texture2D(Tex0, fTexCoord)) * (fColor + texture2D(Tex2, fTexCoord));
 
     }
-    else{  //Gouraud
+    else{  //Phong
         vec4 tempColor=fColor;
         vec4 positionalColor;
         vec4 directionalColor;
 
         if(positional2){
-            positionalColor = lightGouraud2(ambientProductP2, diffuseProductP2, specularProductP2, 1.0 );
+            positionalColor = lightPhong2(ambientProductP2, diffuseProductP2, specularProductP2, 1.0 );
             tempColor += positionalColor;
 
         }
         if(directional2){
-            directionalColor = lightGouraud2(ambientProductD2, diffuseProductD2, specularProductD2, 2.0 );
+            directionalColor = lightPhong2(ambientProductD2, diffuseProductD2, specularProductD2, 2.0 );
             tempColor += directionalColor;
         }
 
