@@ -5,6 +5,12 @@
 <button id = "ButtonY">Rotate Y</button>
 <button id = "ButtonZ">Rotate Z</button>
 <button id = "ButtonT">Toggle Rotation</button>
+<button id="ButtonL">Gouraud/Phong</button>
+<button id="ButtonP">Positional</button>
+<button id="ButtonD">Directional</button>
+<button id="ButtonA">Spotlight</button>
+<button id="ButtonTex">Texture</button>
+<div id= "type">Gouraud</div>
 
 
 <script id="vertex-shader" type="x-shader/x-vertex">
@@ -12,11 +18,33 @@
 attribute  vec4 vPosition;
 attribute  vec4 vColor;
 attribute  vec2 vTexCoord;
+attribute  vec4 vNormal;
 
 varying vec4 fColor;
 varying vec2 fTexCoord;
 
 uniform vec3 theta;
+
+uniform float shininess;
+
+uniform vec4 lightPositionP;
+uniform vec4 ambientProductP;
+uniform vec4 diffuseProductP;
+uniform vec4 specularProductP;
+
+uniform vec4 lightPositionD;
+uniform vec4 ambientProductD;
+uniform vec4 diffuseProductD;
+uniform vec4 specularProductD;
+
+uniform vec4 lightPositionS;
+uniform vec4 ambientProductS;
+uniform vec4 diffuseProductS;
+uniform vec4 specularProductS;
+
+vec4 PosAmbient, PosDiffuse, PosSpecular;
+vec4 DirAmbient, DirDiffuse, DirSpecular;
+vec4 SpotAmbient, SpotDiffuse, SpotSpecular;
 
 void main()
 {
@@ -43,10 +71,31 @@ void main()
 		    0.0,  0.0, 1.0, 0.0,
 		    0.0,  0.0, 0.0, 1.0 );
 
-    fColor = vColor;
+    //positional
+    vec3 pos = (rz * ry * rx * vPosition).xyz;
+    vec3 light = lightPositionP.xyz;
+    vec3 L;
+    L = normalize( light - pos ); //normalize(light) direzionale
+    vec3 E = normalize(-pos);
+    vec3 N = normalize( (rz * ry * rx*vNormal).xyz);
+    vec3 H = normalize( L + E );
+    vec4 PosAmbient = ambientProductP;
+    float Kd = max( dot(L, N), 0.0 );
+    vec4 PosDiffuse = Kd*diffuseProductP;
+    float Ks = pow( max(dot(N, H), 0.0), shininess );
+    vec4 PosSpecular = Ks * specularProductP;
+    if (dot(L,N) < 0.0) PosSpecular=vec4(0.0,0.0,0.0,1.0);
+
+
+    vec4 ambient=PosAmbient;
+    vec4 diffuse=PosDiffuse;
+    vec4 specular=PosSpecular;
+
+    fColor = vColor * (diffuse + specular);
+    fColor.a =1.0;
     fTexCoord = vTexCoord;
     gl_Position = rz * ry * rx * vPosition;
-    gl_Position.z = -gl_Position.z;
+    // gl_Position.z = -gl_Position.z;
 }
 </script>
 
@@ -63,7 +112,7 @@ uniform sampler2D Tex1;
 void
 main()
 {
-    gl_FragColor = fColor*(texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord));
+    gl_FragColor = fColor;
 
 }
 </script>
