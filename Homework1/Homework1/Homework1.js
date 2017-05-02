@@ -25,7 +25,7 @@ var flag = false;
 ██      ██    ██
 */
 
-var positional = true;
+var positional = false;
 var directional = false;
 var spotlight = false;
 
@@ -44,7 +44,8 @@ var modelViewMatrixLoc, projectionMatrixLoc;
 var normalMatrix, normalMatrixLoc;
 
 
-var lightPosition = vec4(0.0, 0.0, 2.0, 0.0 );
+
+var lightPosition = vec4(0.0, 0.0, -1.0, 0.0 );
 var lightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
@@ -54,7 +55,7 @@ var cutOff = 0.90;
 
 var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
 var materialDiffuse = vec4( 1.0, 0.8, 0.0, 1.0);
-var materialSpecular = vec4( 1.0, 0.8, 0.0, 1.0 );
+var materialSpecular = vec4( 1.0, 0.8, 1.0, 1.0 );
 var materialShininess = 100.0;
 /*
 
@@ -348,6 +349,9 @@ window.onload = function init() {
     gl.uniform4fv(gl.getUniformLocation(program, "ambientProductS2"), flatten(ambientProduct));
     gl.uniform4fv(gl.getUniformLocation(program, "diffuseProductS2"), flatten(diffuseProduct));
     gl.uniform4fv(gl.getUniformLocation(program, "specularProductS2"), flatten(specularProduct));
+
+    gl.uniform4fv(gl.getUniformLocation(program, "lightDirectionS2"), flatten(lightDirection));
+    gl.uniform1f(gl.getUniformLocation(program, "cutOff2"), cutOff);
 
     // gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"), false, flatten(projection));
 
