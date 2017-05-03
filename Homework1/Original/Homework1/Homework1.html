@@ -105,7 +105,7 @@ void main()
         //directional
         if(directional){
             vec3 pos = (rz * ry * rx * vPosition).xyz;
-            vec3 light = lightPositionP.xyz;
+            vec3 light = lightPositionD.xyz;
             vec3 L;
             L = normalize( light  ); //normalize(light) direzionale
             vec3 E = normalize(-pos);
@@ -122,10 +122,10 @@ void main()
         //spotlight
         if(spotlight){
             vec3 pos = (rz * ry * rx * vPosition).xyz;
-            vec3 light = lightPositionP.xyz;
+            vec3 light = lightPositionS.xyz;
             vec3 L;
             L = normalize( light );
-            vec3 E = normalize(-pos);
+            vec3 E = -normalize(pos);
             vec3 N = normalize( (rz * ry * rx*vNormal).xyz);
             vec3 H = normalize( L + E );
             DirAmbient = ambientProductS;
@@ -148,36 +148,41 @@ void main()
         vec4 diffuse=PosDiffuse + DirDiffuse + SpotDiffuse;
         vec4 specular=PosSpecular+ DirSpecular + SpotSpecular;
 
-        fColor = vColor * (diffuse + specular);
+        // fColor = vColor * (diffuse + specular);
+        fColor =  (diffuse + specular);
         fColor.a =1.0;
         fTexCoord = vTexCoord;
         gl_Position = rz * ry * rx * vPosition;
         // gl_Position.z = -gl_Position.z;
     }
     else{
-        vec3 pos = (rz * ry * rx * vPosition).xyz;
-        vec3 light = lightPosition.xyz;
-
 
         if(positional){
-             Lp = normalize( light - pos ); //normalize(light) direzionale
-             Ep = normalize(-pos);
-             Np = normalize( (rz * ry * rx*vNormal).xyz);
+            vec3 pos = (rz * ry * rx * vPosition).xyz;
+            vec3 light = lightPositionP.xyz;
+            Lp = normalize( light - pos ); //normalize(light) direzionale
+            Ep = normalize(-pos);
+            Np = normalize( (rz * ry * rx*vNormal).xyz);
          }
         if(directional){
-             Ld = normalize(light);
-             Ed = normalize(-pos);
-             Nd = normalize( (rz * ry * rx*vNormal).xyz);
+            vec3 pos = (rz * ry * rx * vPosition).xyz;
+            vec3 light = lightPositionD.xyz;
+            Ld = normalize(light);
+            Ed = normalize(-pos);
+            Nd = normalize( (rz * ry * rx*vNormal).xyz);
          }
+
          if(spotlight){
-              Ls = normalize( light );
-              Es = normalize(-pos);
-              Ns = normalize( (rz * ry * rx * vNormal).xyz);
+            vec3 pos = (rz * ry * rx * vPosition).xyz;
+            vec3 light = lightPositionS.xyz;
+            Ls = normalize( light );
+            Es = normalize(-pos);
+            Ns = normalize( (rz * ry * rx * vNormal).xyz);
           }
 
           gl_Position =  rz * ry * rx * vPosition;
-          // gl_Position.z = -gl_Position.z;
-          fColor=vColor;
+        //   gl_Position.z = -gl_Position.z;
+          fColor = vColor;
           fTexCoord = vTexCoord;
     }
 }
@@ -197,13 +202,28 @@ uniform sampler2D Tex2;
 uniform bool type2;
 uniform bool texture;
 
+uniform float shininess2;
+
+uniform vec4 ambientProductP2;
+uniform vec4 diffuseProductP2;
+uniform vec4 specularProductP2;
+
+uniform vec4 ambientProductD2;
+uniform vec4 diffuseProductD2;
+uniform vec4 specularProductD2;
+
+uniform vec4 ambientProductS2;
+uniform vec4 diffuseProductS2;
+uniform vec4 specularProductS2;
+
+uniform vec4 lightDirectionS2;
+uniform float cutOff2;
+
+
 uniform bool positional2;
 uniform bool directional2;
 uniform bool spotlight2;
 
-vec4 PosAmbient2, PosDiffuse2, PosSpecular2;
-vec4 DirAmbient2, DirDiffuse2, DirSpecular2;
-vec4 SpotAmbient2, SpotDiffuse2, SpotSpecular2;
 
 varying vec3 Np, Lp, Ep;
 varying vec3 Nd, Ld, Ed;
@@ -218,6 +238,31 @@ main()
 
     }
     else{
+        vec4 PosAmbient2, PosDiffuse2, PosSpecular2;
+        vec4 DirAmbient2, DirDiffuse2, DirSpecular2;
+        vec4 SpotAmbient2, SpotDiffuse2, SpotSpecular2;
+
+        if(positional2){
+            vec3 L,N,E;
+            L=Lp; N=Np; E=Ep;
+            vec3 H = normalize( L + E );
+            PosAmbient2 = ambientProductP2;
+            float Kd = max( dot(L, N), 0.0 );
+            PosDiffuse2 = Kd*diffuseProductP2;
+            float Ks = pow( max(dot(N, H), 0.0), shininess2 );
+            PosSpecular2 = Ks * specularProductP2;
+            if (dot(L,N) < 0.0) PosSpecular2=vec4(0.0,0.0,0.0,1.0);
+        }
+
+        vec4 ambient=PosAmbient2+DirAmbient2+SpotAmbient2;
+        vec4 diffuse=PosDiffuse2+DirDiffuse2+SpotDiffuse2;
+        vec4 specular=PosSpecular2+DirSpecular2+SpotSpecular2;
+
+        vec4 tempColor =   (diffuse + specular);
+        tempColor.a = 1.0;
+
+        if (!texture) gl_FragColor = tempColor;
+        else gl_FragColor = texture2D(Tex0, fTexCoord) *(tempColor + texture2D(Tex2, fTexCoord));
 
     }
 

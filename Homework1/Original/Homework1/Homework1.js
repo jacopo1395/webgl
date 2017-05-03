@@ -17,13 +17,6 @@ var c;
 
 var flag = false;
 
-/*
-███    ███ ██    ██
-████  ████  ██  ██
-██ ████ ██   ████
-██  ██  ██    ██
-██      ██    ██
-*/
 
 var positional = false;
 var directional = false;
@@ -45,7 +38,7 @@ var normalMatrix, normalMatrixLoc;
 
 
 
-var lightPosition = vec4(0.0, 0.0, -1.1, 0.0 );
+var lightPosition = vec4(0.0, 0.0, -2.0, 0.0 );
 var lightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
@@ -57,11 +50,6 @@ var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
 var materialDiffuse = vec4( 1.0, 1.0, 1.0, 1.0);
 var materialSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var materialShininess = 100.0;
-/*
-
-█████ █████ █████ █████ █████ █████ █████ █████ █████ █████ █████ █████ █████
-*/
-
 
 
 
@@ -180,13 +168,6 @@ function configureTexture() {
 }
 
 function quad(a, b, c, d) {
-    /*
-    ███    ███ ██    ██
-    ████  ████  ██  ██
-    ██ ████ ██   ████
-    ██  ██  ██    ██
-    ██      ██    ██
-    */
 
 
     var t1 = subtract(vertices[b], vertices[a]);
@@ -226,10 +207,7 @@ function quad(a, b, c, d) {
     texCoordsArray.push(texCoord[3]);
     normalsArray.push(normal);
 
-    /*
 
-    █████ █████ █████ █████ █████
-    */
 
 
 }
@@ -301,13 +279,7 @@ window.onload = function init() {
 
     // projection = ortho(-1, 1, -1, 1, -100, 100);
 
-    /*
-    ███    ███ ██    ██
-    ████  ████  ██  ██
-    ██ ████ ██   ████
-    ██  ██  ██    ██
-    ██      ██    ██
-    */
+
 
 
     var ambientProduct = mult(lightAmbient, materialAmbient);
@@ -354,12 +326,6 @@ window.onload = function init() {
     gl.uniform1f(gl.getUniformLocation(program, "cutOff2"), cutOff);
 
     // gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"), false, flatten(projection));
-
-    /*
-
-    █████ █████ █████ █████ █████ █████ █████ █████ █████ █████ █████ █████ █████ █████ █████
-    */
-
 
 
     configureTexture();
@@ -445,13 +411,7 @@ var render = function() {
     gl.uniform1i(spotlighLoc, spotlight);
     gl.uniform1i(spotlighLoc2, spotlight);
 
-    // modelView = mat4();
-    // modelView = mult(modelView, rotate(theta[xAxis], [1, 0, 0] ));
-    // modelView = mult(modelView, rotate(theta[yAxis], [0, 1, 0] ));
-    // modelView = mult(modelView, rotate(theta[zAxis], [0, 0, 1] ));
-    //
-    // gl.uniformMatrix4fv( gl.getUniformLocation(program,
-    //         "modelViewMatrix"), false, flatten(modelView) );
+
     gl.drawArrays(gl.TRIANGLES, 0, numVertices);
     requestAnimFrame(render);
 }
