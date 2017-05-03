@@ -45,13 +45,13 @@ var normalMatrix, normalMatrixLoc;
 
 
 
-var lightPosition = vec4(0.0, 0.0, -2.0, 0.0 );
+var lightPosition = vec4(0.0, 0.0, -1.1, 0.0 );
 var lightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
-var lightDirection = vec4( 0.0, 0.0, -1.0, 1.0 );
-var cutOff = 0.90;
+var lightDirection = vec4( 0.0, 0.0, 0.0, 1.0 );
+var cutOff = 0.97;
 
 var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
 var materialDiffuse = vec4( 1.0, 1.0, 1.0, 1.0);
