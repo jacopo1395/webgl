@@ -306,7 +306,7 @@ main()
             if(effect>(cutOff2)){
                 if(effect<0.99){
                     SpotAmbient2 = SpotAmbientT;
-                    SpotDiffuse2 = SpotDiffuseT/((effect)/0.97);
+                    SpotDiffuse2 = SpotDiffuseT;
                     SpotSpecular2 = SpotSpecularT;
                 }
                 if(effect>=0.99){
@@ -332,7 +332,7 @@ main()
         tempColor.a = 1.0;
 
         if (!texture) gl_FragColor = tempColor;
-        else gl_FragColor =  tempColor *( texture2D(Tex0, fTexCoord)*texture2D(Tex2, fTexCoord));
+        else gl_FragColor =  texture2D(Tex0, fTexCoord) * (fColor + texture2D(Tex2, fTexCoord));
 
     }
 
