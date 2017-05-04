@@ -46,7 +46,7 @@ var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var lightDirection = vec4( 0.0, 0.0, -1.5, 1.0 );
 var cutOff = 0.97;
 
-var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
+var materialAmbient = vec4( 1.0, 1.0, 1.0, 1.0 );
 var materialDiffuse = vec4( 1.0, 1.0, 1.0, 1.0);
 var materialSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var materialShininess = 100.0;
@@ -135,7 +135,7 @@ var type = true; //false= Phong  |  true = Gouraud
 var typeLoc, typeLoc2;
 var thetaLoc;
 
-var texture = false;
+var texture = true;
 var textureLoc;
 
 function configureTexture() {
