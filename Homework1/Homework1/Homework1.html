@@ -1,16 +1,10 @@
 <!DOCTYPE html>
 <html>
 
-<button id="ButtonX">Rotate X</button>
-<button id="ButtonY">Rotate Y</button>
-<button id="ButtonZ">Rotate Z</button>
-<button id="ButtonT">Toggle Rotation</button>
-<button id="ButtonL">Gouraud/Phong</button>
-<button id="ButtonP">Positional</button>
-<button id="ButtonD">Directional</button>
-<button id="ButtonA">Spotlight</button>
-<button id="ButtonTex">Texture</button>
-<div id= "type">Gouraud</div>
+<button id = "ButtonX">Rotate X</button>
+<button id = "ButtonY">Rotate Y</button>
+<button id = "ButtonZ">Rotate Z</button>
+<button id = "ButtonT">Toggle Rotation</button>
 
 
 <script id="vertex-shader" type="x-shader/x-vertex">
@@ -18,113 +12,14 @@
 attribute  vec4 vPosition;
 attribute  vec4 vColor;
 attribute  vec2 vTexCoord;
-attribute  vec4 vNormal;
 
 varying vec4 fColor;
 varying vec2 fTexCoord;
 
 uniform vec3 theta;
 
-varying vec3 Np, Lp, Ep;
-varying vec3 Nd, Ld, Ed;
-varying vec3 Ns, Ls, Es;
-
-uniform float shininess;
-
-uniform vec4 lightPositionP;
-uniform vec4 ambientProductP;
-uniform vec4 diffuseProductP;
-uniform vec4 specularProductP;
-
-uniform vec4 lightPositionD;
-uniform vec4 ambientProductD;
-uniform vec4 diffuseProductD;
-uniform vec4 specularProductD;
-
-uniform vec4 lightPositionS;
-uniform vec4 ambientProductS;
-uniform vec4 diffuseProductS;
-uniform vec4 specularProductS;
-
-uniform vec4 lightDirectionS;
-uniform float cutOff;
-
-uniform bool type;
-
-uniform bool positional;
-uniform bool directional;
-uniform bool spotlight;
-
- vec4 PosAmbient, PosDiffuse, PosSpecular;
- vec4 DirAmbient, DirDiffuse, DirSpecular;
- vec4 SpotAmbient, SpotDiffuse, SpotSpecular;
-
-void lightGouraud(mat4 modelViewMatrix, vec4 lightPosition, vec4 ambientProduct,
-                vec4 diffuseProduct, vec4 specularProduct, float l){
-    vec4 tempColor;
-    vec3 pos = (modelViewMatrix * vPosition).xyz;
-    vec3 light = lightPosition.xyz;
-    vec3 L;
-    if (l==1.0) L = normalize( light - pos ); //normalize(light) direzionale
-    if (l==2.0) L = normalize (light);
-    if (l==3.0) L = normalize(light);
-    vec3 E = normalize(-pos);
-    vec3 N = normalize( (modelViewMatrix*vNormal).xyz);
-
-    vec3 H = normalize( L + E );
-    vec4 ambient = ambientProduct;
-    float Kd = max( dot(L, N), 0.0 );
-    vec4 diffuse = Kd*diffuseProduct;
-    float Ks = pow( max(dot(N, H), 0.0), shininess );
-    vec4 specular = Ks * specularProduct;
-    if (dot(L,N) < 0.0) specular=vec4(0.0,0.0,0.0,1.0);
-
-    if (l==1.0) {
-        PosAmbient = ambient;
-        PosDiffuse = diffuse;
-        PosSpecular = specular;
-    }
-    if(l==2.0){
-        DirAmbient = ambient;
-        DirDiffuse = diffuse;
-        DirSpecular = specular;
-    }
-
-    if(l==3.0){
-        vec3 D = lightDirectionS.xyz;
-        float effect = dot(normalize(D), normalize(L));
-        if(effect>cutOff){
-            SpotAmbient = ambient;
-            SpotDiffuse = diffuse;
-            SpotSpecular = specular;
-
-        }
-    }
-
-}
-
-void lightPhong(mat4 modelViewMatrix, vec4 lightPosition, float l){
-    vec3 pos = (modelViewMatrix * vPosition).xyz;
-    vec3 light = lightPosition.xyz;
-    if(l==1.0){
-         Lp = normalize( light - pos ); //normalize(light) direzionale
-         Ep = normalize(-pos);
-         Np = normalize( (modelViewMatrix*vNormal).xyz);
-     }
-    if(l==2.0){
-         Ld = normalize(light);
-         Ed = normalize(-pos);
-         Nd = normalize( (modelViewMatrix*vNormal).xyz);
-     }
-     if(l==3.0){
-          Ls = normalize( light );
-          Es = normalize(-pos);
-          Ns = normalize( (modelViewMatrix*vNormal).xyz);
-      }
-}
-
-void main(){
-
+void main()
+{
     // Compute the sines and cosines of theta for each of
     //   the three axes in one computation.
     vec3 angles = radians( theta );
@@ -142,75 +37,16 @@ void main(){
 		    s.y, 0.0,  c.y, 0.0,
 		    0.0, 0.0,  0.0, 1.0 );
 
+
     mat4 rz = mat4( c.z, s.z, 0.0, 0.0,
 		    -s.z,  c.z, 0.0, 0.0,
 		    0.0,  0.0, 1.0, 0.0,
 		    0.0,  0.0, 0.0, 1.0 );
 
-    mat4 modelViewMatrix = rz * ry * rx ;
-
-    if(type){ //Gouraud
-
-        if(positional) {
-            lightGouraud(modelViewMatrix, lightPositionP, ambientProductP,
-                                    diffuseProductP,  specularProductP, 1.0);
-
-        }
-        if(directional) {
-            lightGouraud(modelViewMatrix, lightPositionD, ambientProductD,
-                                    diffuseProductD,  specularProductD, 2.0);
-
-        }
-        if(spotlight) {
-            lightGouraud(modelViewMatrix, lightPositionS, ambientProductS,
-                                    diffuseProductS,  specularProductS, 3.0);
-        }
-
-
-
-        vec4 ambient=PosAmbient+DirAmbient+SpotAmbient;
-        vec4 diffuse=PosDiffuse+DirDiffuse+SpotDiffuse;
-        vec4 specular=PosSpecular+DirSpecular+SpotSpecular;
-
-
-        // vec4 tempColor;
-        // vec3 pos = (modelViewMatrix * vPosition).xyz;
-        // vec3 light = lightPositionP.xyz;
-        // vec3 L;
-        //  L = normalize( light - pos ); //normalize(light) direzionale
-        //
-        // vec3 E = normalize(-pos);
-        // vec3 N = normalize( (modelViewMatrix*vNormal).xyz);
-        //
-        // vec3 H = normalize( L + E );
-        // vec4 ambient = ambientProductP;
-        // float Kd = max( dot(L, N), 0.0 );
-        // vec4 diffuse = Kd*diffuseProductP;
-        // float Ks = pow( max(dot(N, H), 0.0), shininess );
-        // vec4 specular = Ks * specularProductP;
-        // if (dot(L,N) < 0.0) specular=vec4(0.0,0.0,0.0,1.0);
-
-
-        fColor = (0.2*vColor)+(diffuse+ specular);
-        fColor.a = 1.0;
-
-        fTexCoord = vTexCoord;
-        gl_Position = modelViewMatrix * vPosition;
-        // gl_Position.z = -gl_Position.z;
-
-    }
-    else{ //Phong
-        if(positional)  lightPhong( modelViewMatrix,  lightPositionP, 1.0);
-        if(directional)  lightPhong( modelViewMatrix,  lightPositionD, 2.0);
-        if(spotlight)  lightPhong( modelViewMatrix,  lightPositionS, 3.0);
-
-        gl_Position =  modelViewMatrix * vPosition;
-        // gl_Position.z = -gl_Position.z;
-        fColor=vColor;
-        fTexCoord = vTexCoord;
-    }
-
-
+    fColor = vColor;
+    fTexCoord = vTexCoord;
+    gl_Position = rz * ry * rx * vPosition;
+    gl_Position.z = -gl_Position.z;
 }
 </script>
 
@@ -223,112 +59,11 @@ varying  vec2 fTexCoord;
 
 uniform sampler2D Tex0;
 uniform sampler2D Tex1;
-uniform sampler2D Tex2;
 
-uniform float shininess2;
-
-uniform vec4 ambientProductP2;
-uniform vec4 diffuseProductP2;
-uniform vec4 specularProductP2;
-
-uniform vec4 ambientProductD2;
-uniform vec4 diffuseProductD2;
-uniform vec4 specularProductD2;
-
-uniform vec4 ambientProductS2;
-uniform vec4 diffuseProductS2;
-uniform vec4 specularProductS2;
-
-uniform vec4 lightDirectionS2;
-uniform float cutOff2;
-
-varying vec3 Np, Lp, Ep;
-varying vec3 Nd, Ld, Ed;
-varying vec3 Ns, Ls, Es;
-
-uniform bool type2;
-uniform bool texture;
-
-uniform bool positional2;
-uniform bool directional2;
-uniform bool spotlight2;
-
- vec4 PosAmbient2, PosDiffuse2, PosSpecular2;
- vec4 DirAmbient2, DirDiffuse2, DirSpecular2;
- vec4 SpotAmbient2, SpotDiffuse2, SpotSpecular2;
-
-
-
-void lightPhong2(vec4 ambientProduct, vec4 diffuseProduct, vec4 specularProduct, float l){
-    vec3 L,N,E;
-    if(l==1.0){
-        L=Lp; N=Np; E=Ep;
-    }
-    if(l==2.0){
-        L=Ld; N=Nd; E=Ed;
-    }
-    vec3 H = normalize( L + E );
-    vec4 ambient = ambientProduct;
-    float Kd = max( dot(L, N), 0.0 );
-    vec4 diffuse = Kd * diffuseProduct;
-    float Ks = pow( max(dot(N, H), 0.0), shininess2 );
-    vec4 specular = Ks * specularProduct;
-    if( dot(L, N) < 0.0 ) specular = vec4(0.0, 0.0, 0.0, 1.0);
-
-    if (l==1.0) {
-        PosAmbient2 = ambient;
-        PosDiffuse2 = diffuse;
-        PosSpecular2 = specular;
-    }
-    if(l==2.0){
-        DirAmbient2 = ambient;
-        DirDiffuse2 = diffuse;
-        DirSpecular2 = specular;
-    }
-    if(l==3.0){
-        vec3 D = lightDirectionS2.xyz;
-        float effect = dot(normalize(D), normalize(L));
-        if(effect>cutOff2){
-            SpotAmbient2 = ambient;
-            SpotDiffuse2 = diffuse;
-            SpotSpecular2 = specular;
-
-        }
-    }
-
-}
-
-void main(){
-    if(type2){ //Gouraud
-        if(!texture)  gl_FragColor = fColor;
-        else   gl_FragColor =  texture2D(Tex0, fTexCoord) * (fColor + texture2D(Tex2, fTexCoord));
-
-    }
-    else{  //Phong
-        vec4 tempColor;
-
-        if(positional2){
-            lightPhong2(ambientProductP2, diffuseProductP2, specularProductP2, 1.0 );
-
-        }
-        if(directional2){
-            lightPhong2(ambientProductD2, diffuseProductD2, specularProductD2, 2.0 );
-        }
-        if(spotlight2){
-            lightPhong2(ambientProductS2, diffuseProductS2, specularProductS2, 3.0 );
-        }
-
-
-        vec4 ambient=PosAmbient2+DirAmbient2+SpotAmbient2;
-        vec4 diffuse=PosDiffuse2+DirDiffuse2+SpotDiffuse2;
-        vec4 specular=PosSpecular2+DirSpecular2+SpotSpecular2;
-
-        tempColor = (0.2*fColor)+(diffuse+specular);
-        tempColor.a = 1.0;
-
-        if (!texture) gl_FragColor = tempColor;
-        else gl_FragColor = (texture2D(Tex0, fTexCoord) *(tempColor) + texture2D(Tex2, fTexCoord));
-    }
+void
+main()
+{
+    gl_FragColor = fColor*(texture2D(Tex0, fTexCoord)*texture2D(Tex1, fTexCoord));
 
 }
 </script>
@@ -339,9 +74,8 @@ void main(){
 <script type="text/javascript" src="Homework1.js"></script>
 
 <body>
-    <canvas id="gl-canvas" width="1024" height="1024">
+<canvas id="gl-canvas" width="1024" height="1024">
 Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
 </body>
-
 </html>
