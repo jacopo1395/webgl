@@ -53,7 +53,7 @@ var indexHighId = 12;
 var thumbLowId = 13;
 var thumbHighId = 14;
 
-var wristHeight = 5.0;
+var wristHeight = 10.0;
 var wristWidth = 10.0;
 var pinkieHeight = 2.0;
 var pinkieWidth = 1.0;
@@ -63,7 +63,7 @@ var middleWidth = 1.0;
 var middleHeight = 4.0;
 var indexWidth = 1.0;
 var indexHeight = 3.0;
-var thumbHeight = 5.0;
+var thumbHeight = 3.0;
 var thumbWidth = 1.0;
 
 
@@ -75,6 +75,8 @@ var theta = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 var numVertices = 24; //non serve
 var stack = [];
 var figure = [];
+
+var animation = false;
 
 for (var i = 0; i < numNodes; i++) figure[i] = createNode(null, null, null, null);
 
@@ -124,7 +126,7 @@ function initNodes(Id) {
             break;
 
         case pinkieLowId:
-            m = translate(-4.0, wristHeight, 0.0);
+            m = translate(-5.0, wristHeight, 0.0);
             m = mult(m, rotate(theta[pinkieLowId], 1, 0, 0));
             figure[pinkieLowId] = createNode(m, pinkieLow, ringLowId, pinkieMiddleId);
             break;
@@ -156,7 +158,7 @@ function initNodes(Id) {
             break;
 
         case middleLowId:
-            m = translate(0.0, wristHeight, 0.0);
+            m = translate(2.0, wristHeight, 0.0);
             m = mult(m, rotate(theta[middleLowId], 1, 0, 0));
             figure[middleLowId] = createNode(m, middleLow, indexLowId, middleMiddleId);
             break;
@@ -172,7 +174,7 @@ function initNodes(Id) {
             break;
 
         case indexLowId:
-            m = translate(2.0, wristHeight, 0.0);
+            m = translate(5.0, wristHeight, 0.0);
             m = mult(m, rotate(theta[indexLowId], 1, 0, 0));
             figure[indexLowId] = createNode(m, indexLow, thumbLowId, indexMiddleId);
             break;
@@ -188,11 +190,14 @@ function initNodes(Id) {
             break;
 
         case thumbLowId:
-
+            m = translate(5.0, wristHeight*0.3, 0.0);
+            m = mult(m, rotate(-90.0, 0, 0, 1));
+            m = mult(m, rotate(theta[thumbLowId], 1, 0, 0));
             figure[thumbLowId] = createNode(m, thumbLow, null, thumbHighId);
             break;
         case thumbHighId:
-
+            m = translate(0.0, thumbHeight, 0.0);
+            m = mult(m, rotate(theta[thumbHighId], 1, 0, 0));
             figure[thumbHighId] = createNode(m, thumbHigh, null, null);
             break;
 
@@ -342,22 +347,6 @@ function cube() {
     quad(5, 4, 0, 1);
 }
 
-var flag =false;
-
-function animation(){
-    // if (flag){
-         while(theta[10]<90.0){
-             for (var i = 1; i < 12; i++) {
-                 theta[i]+=2.0;
-                 initNodes(i);
-             }
-
-            console.log("start");
-
-         }
-    // }
-}
-
 window.onload = function init() {
 
     canvas = document.getElementById("gl-canvas");
@@ -468,9 +457,23 @@ window.onload = function init() {
         initNodes(indexHighId);
     };
 
+    document.getElementById("slider12").onchange = function(event) {
+        theta[thumbLowId] = event.target.value;
+        initNodes(thumbLowId);
+    };
+    document.getElementById("slider13").onchange = function(event) {
+        theta[thumbHighId] = event.target.value;
+        initNodes(thumbHighId);
+    };
+
     document.getElementById("animation").onclick = function() {
-        flag = !flag;
-        animation();
+
+        for (var i = 1; i <= 14; i++) {
+            theta[i]=0.0;
+            initNodes(i);
+        }
+        animation = !animation;
+
     };
 
     for (i = 0; i < numNodes; i++) initNodes(i);
@@ -482,7 +485,15 @@ window.onload = function init() {
 var render = function() {
 
     gl.clear(gl.COLOR_BUFFER_BIT);
+    if(theta[14]<90.0  && animation){
+        for (var i = 1; i <= 14; i++) {
+            theta[i]+=2.0;
+            initNodes(i);
+        }
 
+       console.log(theta[12]);
+
+    }
     traverse(wristId);
     requestAnimFrame(render);
 }
