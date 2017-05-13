@@ -16,6 +16,7 @@ void main()
 {
     fColor = vColor;
     gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+    //gl_Position.z = -gl_Position.z;
 }
 </script>
 
@@ -53,7 +54,7 @@ wrist Y angle -180
 
 
 
-<button id="animation">Start Animation</button>
+<button id="animation">Start/Reset Animation</button>
 
 <body>
 <canvas id="gl-canvas" width="512" height="512">

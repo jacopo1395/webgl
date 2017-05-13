@@ -54,7 +54,7 @@ var thumbLowId = 13;
 var thumbHighId = 14;
 
 var wristHeight = 10.0;
-var wristWidth = 10.0;
+var wristWidth = 7.0;
 var pinkieHeight = 2.0;
 var pinkieWidth = 1.0;
 var ringHeight = 3.0;
@@ -126,77 +126,77 @@ function initNodes(Id) {
             break;
 
         case pinkieLowId:
-            m = translate(-5.0, wristHeight, 0.0);
+            m = translate(0.5-(wristWidth/2), wristHeight + 0.5, 0.0);
             m = mult(m, rotate(theta[pinkieLowId], 1, 0, 0));
             figure[pinkieLowId] = createNode(m, pinkieLow, ringLowId, pinkieMiddleId);
             break;
         case pinkieMiddleId:
-            m = translate(0.0, pinkieHeight, 0.0);
+            m = translate(0.0, pinkieHeight + 0.5, 0.0);
             m = mult(m, rotate(theta[pinkieMiddleId], 1, 0, 0));
             figure[pinkieMiddleId] = createNode(m, pinkieMiddle, null, pinkieHighId);
             break;
         case pinkieHighId:
-            m = translate(0.0, pinkieHeight, 0.0);
+            m = translate(0.0, pinkieHeight + 0.5, 0.0);
             m = mult(m, rotate(theta[pinkieHighId], 1, 0, 0));
             figure[pinkieHighId] = createNode(m, pinkieHigh, null, null);
             break;
 
         case ringLowId:
-            m = translate(-2.0, wristHeight, 0.0);
+            m = translate(0.5-(wristWidth/2)+2.0, wristHeight + 0.5, 0.0);
             m = mult(m, rotate(theta[ringLowId], 1, 0, 0));
             figure[ringLowId] = createNode(m, ringLow, middleLowId, ringMiddleId);
             break;
         case ringMiddleId:
-            m = translate(0.0, ringHeight, 0.0);
+            m = translate(0.0, ringHeight + 0.5, 0.0);
             m = mult(m, rotate(theta[ringMiddleId], 1, 0, 0));
             figure[ringMiddleId] = createNode(m, ringMiddle, null, ringHighId);
             break;
         case ringHighId:
-            m = translate(0.0, ringHeight, 0.0);
+            m = translate(0.0, ringHeight + 0.5, 0.0);
             m = mult(m, rotate(theta[ringHighId], 1, 0, 0));
             figure[ringHighId] = createNode(m, ringHigh, null, null);
             break;
 
         case middleLowId:
-            m = translate(2.0, wristHeight, 0.0);
+            m = translate(0.5-(wristWidth/2)+4.0, wristHeight + 0.5, 0.0);
             m = mult(m, rotate(theta[middleLowId], 1, 0, 0));
             figure[middleLowId] = createNode(m, middleLow, indexLowId, middleMiddleId);
             break;
         case middleMiddleId:
-            m = translate(0.0, middleHeight, 0.0);
+            m = translate(0.0, middleHeight + 0.5, 0.0);
             m = mult(m, rotate(theta[middleMiddleId], 1, 0, 0));
             figure[middleMiddleId] = createNode(m, middleMiddle, null, middleHighId);
             break;
         case middleHighId:
-            m = translate(0.0, middleHeight, 0.0);
+            m = translate(0.0, middleHeight + 0.5, 0.0);
             m = mult(m, rotate(theta[middleHighId], 1, 0, 0));
             figure[middleHighId] = createNode(m, middleHigh, null, null);
             break;
 
         case indexLowId:
-            m = translate(5.0, wristHeight, 0.0);
+            m = translate(0.5-(wristWidth/2)+6.0, wristHeight + 0.5, 0.0);
             m = mult(m, rotate(theta[indexLowId], 1, 0, 0));
             figure[indexLowId] = createNode(m, indexLow, thumbLowId, indexMiddleId);
             break;
         case indexMiddleId:
-            m = translate(0.0, indexHeight, 0.0);
+            m = translate(0.0, indexHeight + 0.5, 0.0);
             m = mult(m, rotate(theta[indexMiddleId], 1, 0, 0));
             figure[indexMiddleId] = createNode(m, indexMiddle, null, indexHighId);
             break;
         case indexHighId:
-            m = translate(0.0, indexHeight, 0.0);
+            m = translate(0.0, indexHeight + 0.5, 0.0);
             m = mult(m, rotate(theta[indexHighId], 1, 0, 0));
             figure[indexHighId] = createNode(m, indexHigh, null, null);
             break;
 
         case thumbLowId:
-            m = translate(5.0, wristHeight*0.3, 0.0);
+            m = translate(wristWidth-3.5 + 0.5, (wristHeight*0.3 ), 0.0);
             m = mult(m, rotate(-90.0, 0, 0, 1));
             m = mult(m, rotate(theta[thumbLowId], 1, 0, 0));
             figure[thumbLowId] = createNode(m, thumbLow, null, thumbHighId);
             break;
         case thumbHighId:
-            m = translate(0.0, thumbHeight, 0.0);
+            m = translate(0.0, thumbHeight + 0.5, 0.0);
             m = mult(m, rotate(theta[thumbHighId], 1, 0, 0));
             figure[thumbHighId] = createNode(m, thumbHigh, null, null);
             break;
@@ -359,6 +359,8 @@ window.onload = function init() {
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.clearColor(1.0, 1.0, 1.0, 1.0);
 
+    gl.enable(gl.DEPTH_TEST);
+
     //
     //  Load shaders and initialize attribute buffers
     //
@@ -457,11 +459,11 @@ window.onload = function init() {
         initNodes(indexHighId);
     };
 
-    document.getElementById("slider12").onchange = function(event) {
+    document.getElementById("slider13").onchange = function(event) {
         theta[thumbLowId] = event.target.value;
         initNodes(thumbLowId);
     };
-    document.getElementById("slider13").onchange = function(event) {
+    document.getElementById("slider14").onchange = function(event) {
         theta[thumbHighId] = event.target.value;
         initNodes(thumbHighId);
     };
@@ -470,6 +472,7 @@ window.onload = function init() {
 
         for (var i = 1; i <= 14; i++) {
             theta[i]=0.0;
+            document.getElementById("slider"+i).value=theta[i];
             initNodes(i);
         }
         animation = !animation;
@@ -488,6 +491,7 @@ var render = function() {
     if(theta[14]<90.0  && animation){
         for (var i = 1; i <= 14; i++) {
             theta[i]+=2.0;
+            document.getElementById("slider"+i).value=theta[i];
             initNodes(i);
         }
 
